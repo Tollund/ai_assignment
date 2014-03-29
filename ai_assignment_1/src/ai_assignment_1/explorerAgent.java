@@ -33,6 +33,8 @@ public class explorerAgent extends Thread {
 	static Collection<Percept> ret;
 	static EnvironmentInterfaceStandard ei = null;
 
+
+
 	public explorerAgent(String name, String type) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException
 	{
 		this.name = name;
@@ -40,15 +42,13 @@ public class explorerAgent extends Thread {
 		initiate();
 	}
 
+
 	public explorerAgent() {
 	}
 
 	public void bus() throws PerceiveException, NoEnvironmentException, InterruptedException{
 
-
-			percieve();
-			recieveInput(ret);
-
+		while(true){
 			try {
 				System.out.println();
 				System.out.println(newMain.getNodeDb());
@@ -57,24 +57,27 @@ public class explorerAgent extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
+			System.out.println();
+			System.out.println(newMain.getNodeDb());
+			System.out.println();
+		}
 	}
 
 
 	public void run() {
 
-		try {
-			bus();
-		} catch (PerceiveException | NoEnvironmentException | InterruptedException e1) {
-			e1.printStackTrace();
-		}
+//		try {
+//			bus();
+//		} catch (PerceiveException | NoEnvironmentException | InterruptedException e1) {
+//			e1.printStackTrace();
+//		}
 
 
 	
 
 	}
 
-	public void recieveInput(Collection<Percept> ret) throws InterruptedException{
+	public void recieveInput(Collection<Percept> ret) throws InterruptedException, PerceiveException, NoEnvironmentException{
 		this.input = ret;
 		System.out.println("Agent " + name + "'s input " + input);
 		String retString = "";
@@ -94,6 +97,7 @@ public class explorerAgent extends Thread {
 				visibleEntity(retString);
 			}
 		}
+		bus();
 		//		s1.V();
 	}
 
@@ -223,8 +227,7 @@ public class explorerAgent extends Thread {
 	}
 
 	public void percieve() throws PerceiveException, NoEnvironmentException{
-		percepts = ei.getAllPercepts(name);
-		System.out.println("Tager percepts");
+		percepts = ei.getAllPercepts("a1");
 		ret = new LinkedList<Percept>();
 		for ( Collection<Percept> ps : percepts.values() ) {
 			ret.addAll(ps);

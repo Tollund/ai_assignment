@@ -47,11 +47,13 @@ public class newMain {
 	public static void main(String[] args) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException {
 		inputThread it = new inputThread();
 		it.start();
-		nodeDb.add(new Node("What she said"));
+		
 		
 		String position = "";
 		String cn = "massim.eismassim.EnvironmentInterface";
 
+		
+		
 		explorerAgent a1 = new explorerAgent("a1", "Explorer");
 		explorerAgent a2 = new explorerAgent("a2", "Explorer");
 		explorerAgent a3 = new explorerAgent("a3", "Explorer");
