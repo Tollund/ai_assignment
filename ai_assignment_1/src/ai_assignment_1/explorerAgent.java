@@ -50,16 +50,11 @@ public class explorerAgent extends Thread {
 
 		while(true){
 			try {
-				System.out.println();
-				System.out.println(newMain.getNodeDb());
-				System.out.println();
+
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			System.out.println();
-			System.out.println(newMain.getNodeDb());
-			System.out.println();
 		}
 	}
 
