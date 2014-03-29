@@ -25,17 +25,14 @@ public class newMain {
 	static Map<String, Collection<Percept>> percepts;
 	static Collection<Percept> ret;
 	
-	public static void main(String[] args) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException {
+	public static void main(String[] args) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException {
 		inputThread it = new inputThread();
 		it.start();
-		EnvironmentInterfaceStandard ei = null;
+
+		
 		String position = "";
-		try {
-			String cn = "massim.eismassim.EnvironmentInterface";
-			ei = EILoader.fromClassName(cn);
-		} catch (IOException e) {
-			//e.printStackTrace();
-		}
+		String cn = "massim.eismassim.EnvironmentInterface";
+
 		
 		
 		explorerAgent a1 = new explorerAgent("a1", "Explorer");
@@ -59,25 +56,7 @@ public class newMain {
 		for (int i = 0; i < explorers.size(); i++) {
 			agent = (explorerAgent) explorers.get(i);
 			agent.start();
-			tempName = agent.getname();
-			ei.registerAgent(tempName);
-			System.out.println("Agent " + tempName + " registered");
-			ei.associateEntity(tempName,"connectionA" + Integer.toString(i+1));
-		}
-		
-		ei.start();			
-		
-		for (int i = 0; i < explorers.size(); i++) {
-			agent = (explorerAgent) explorers.get(i);
-			System.out.println(agent.getname());
-			percepts = ei.getAllPercepts(agent.getname());
-			ret = new LinkedList<Percept>();
-			for ( Collection<Percept> ps : percepts.values() ) {
-				ret.addAll(ps);
-			}
-			agent.recieveInput(ret);
-		}
-		
+		}	
 	}
 
 	private static void getPercept(String string) {
