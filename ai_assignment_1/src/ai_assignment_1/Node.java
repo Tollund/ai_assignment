@@ -8,7 +8,9 @@ public class Node {
 
 	int cost;
 	String name;
-	boolean isExplored;
+	boolean isSurveyed;
+	boolean isProbed;
+
 	Node pred;
 	ArrayList<Node> succ = new ArrayList<>();
 	
@@ -21,23 +23,6 @@ public class Node {
 		return succ;
 	}
 
-	public void addSucc(Node succ) {
-		boolean n = this.succ.contains(succ);
-		//System.out.println("n " + n);
-		if (!n) {
-			this.succ.add(succ);
-			System.out.println("Added " + succ.name + " to " + this.name);
-		}
-		//this.succ.add(succ);
-	}
-	
-	public void setSucc(ArrayList<Node> succ) {
-		this.succ = succ;
-		for (int i = 0; i < this.succ.size(); i++) {
-			System.out.println("Succesor : " + this.succ.get(i).getName() + " to node : " + this.name);
-		}
-		//System.out.println("Set Successors");
-	}
 
 	public int getCost() {
 		return cost;
@@ -73,12 +58,26 @@ public class Node {
 	}
 
 
-	public boolean isExplored() {
-		return isExplored;
+	public boolean isSurveyed() {
+		return isSurveyed;
 	}
 
-	public void setExplored(boolean isExplored) {
-		this.isExplored = isExplored;
+	public void setSurveyed(boolean isSurveyed) {
+		this.isSurveyed = isSurveyed;
+	}
+
+	public void updateNode(Node node1) {
+		for (Node node : succ) {
+			if(node.getName().equals(node1.getName())) succ.add(node);
+		}
+		//TODO sæt edge cost når det er.
 	}
 	
+	public boolean isProbed() {
+		return isProbed;
+	}
+	
+	public void setProbed(boolean isProbed) {
+		this.isProbed = isProbed;
+	}
 }

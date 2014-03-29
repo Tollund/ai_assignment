@@ -133,6 +133,7 @@ public class main {
 						}
 					}
 				}
+				//TODO node possition
 				Node positionNode = null;
 				for (int j = 0; j < nodes.size(); j++) {
 					Node checkNode = (Node) nodes.get(j);
@@ -214,7 +215,6 @@ public class main {
 									for (int l = 0; l < nodes.size(); l++) {
 										Node checksNode = (Node) nodes.get(l);
 										if (checksNode.getName().equals(newList.get(i))) {
-											checkNode.addSucc(checksNode);
 										}
 									}
 								}

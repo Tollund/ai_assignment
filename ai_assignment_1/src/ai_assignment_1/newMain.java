@@ -6,35 +6,52 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-import eis.EILoader;
-import eis.EnvironmentInterfaceStandard;
 import eis.exceptions.AgentException;
 import eis.exceptions.ManagementException;
 import eis.exceptions.NoEnvironmentException;
 import eis.exceptions.PerceiveException;
 import eis.exceptions.RelationException;
-import eis.iilang.Action;
-import eis.iilang.Percept;
+
+
 
 
 public class newMain {
 	
 	static ArrayList explorers = new ArrayList<explorerAgent>();
 	static explorerAgent agent = new explorerAgent();
-	semaphore s1 = new semaphore(0);
-	static Map<String, Collection<Percept>> percepts;
-	static Collection<Percept> ret;
+	static ArrayList<Node> nodeDb = new ArrayList<>();
+	static semaphore s1 = new semaphore(1);
+
 	
+	public static ArrayList<Node> getNodeDb() throws InterruptedException {
+		return nodeDb;
+	}
+
+
+	public static void setNodeDb(Node node1, Node node2) throws InterruptedException {
+		s1.P();
+		for (Node node : nodeDb) {
+			if(node.getName().equals(node1)){
+				node1.updateNode(node2);
+			}
+			else{
+				nodeDb.add(node1);
+				node1.updateNode(node2);
+			}
+		}
+		s1.V();
+	}
+	
+
+
 	public static void main(String[] args) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException {
 		inputThread it = new inputThread();
 		it.start();
-
+		nodeDb.add(new Node("What she said"));
 		
 		String position = "";
 		String cn = "massim.eismassim.EnvironmentInterface";
 
-		
-		
 		explorerAgent a1 = new explorerAgent("a1", "Explorer");
 		explorerAgent a2 = new explorerAgent("a2", "Explorer");
 		explorerAgent a3 = new explorerAgent("a3", "Explorer");
@@ -59,29 +76,4 @@ public class newMain {
 		}	
 	}
 
-	private static void getPercept(String string) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public static void getOrder(String name, Action action) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public void allReady() throws InterruptedException{
-		s1.P();
-		s1.P();
-		s1.P();
-		s1.P();
-		s1.P();
-		s1.P();
-		s1.P();
-		s1.P();
-//		domagic();
-	}
-	
-	public void ready(){
-		s1.V();
-	}
 }
