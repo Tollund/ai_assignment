@@ -43,9 +43,14 @@ public class Node {
 		this.isSurveyed = isSurveyed;
 	}
 
-	public void updateNode(edgeNode node1) throws InterruptedException {
+	public void updateNode(edgeNode node1){
 		if(isSurveyed) return;
-		s1.P();
+		try {
+			s1.P();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		boolean flag = false;
 		for (edgeNode node : nodeList) {
 			if(node.getNode().getName().equals(node1.getNode().getName())){
@@ -60,9 +65,14 @@ public class Node {
 		}
 		s1.V();
 	}
-	public void updateNode(Node node1) throws InterruptedException {
+	public void updateNode(Node node1){
 		if(isSurveyed) return;
-		s1.P();
+		try {
+			s1.P();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		boolean flag = false;
 		for (edgeNode node : nodeList) {
 			if(node.getNode().getName().equals(node1.getName())) flag = true;

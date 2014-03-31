@@ -28,7 +28,7 @@ public class test {
 		ArrayList<Node> tempNodeDb = nodeDb;
 		return tempNodeDb;
 	}
-	
+
 	public static Node getNode(String nodeName) throws InterruptedException{
 		s1.P();
 		for (Node node : nodeDb) {
@@ -40,8 +40,8 @@ public class test {
 		s1.V();
 		return null;
 	}
-	
-	
+
+
 	public static void addNode(Node node1, Node node2) throws InterruptedException {
 		s1.P();
 		boolean flag1 = false;
@@ -73,7 +73,17 @@ public class test {
 			nodeDb.add(node2);
 			s1.V();
 		}
-		
+	}
+	public static void addNode(Node position) throws InterruptedException {
+		s1.P();
+		for (Node node : nodeDb) {
+			if(node.getName().equals(position.getName())){
+				s1.V();
+				return;
+			}
+		}
+		nodeDb.add(position);
+		s1.V();
 	}
 
 	public static void main(String[] args) throws IOException, AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, InterruptedException {
@@ -126,5 +136,7 @@ public class test {
 			agent.start();
 		}
 	}
+
+
 
 }
