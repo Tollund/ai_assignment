@@ -12,7 +12,7 @@ public class Node {
 	boolean isProbed;
 	
 	ArrayList<edgeNode> nodeList = new ArrayList<>();
-	static semaphore s1 = new semaphore(1);
+	private static semaphore s1 = new semaphore(1);
 	
 	public Node(String name){
 		this.name = name;

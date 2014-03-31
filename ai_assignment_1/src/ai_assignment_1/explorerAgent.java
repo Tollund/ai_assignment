@@ -31,7 +31,8 @@ public class explorerAgent extends Thread {
 	private Collection<Percept> input;
 	static Map<String, Collection<Percept>> percepts;
 	private static Collection<Percept> ret;
-	static EnvironmentInterfaceStandard ei = null;
+	static EnvironmentInterfaceStandard ei = null;	
+	private static semaphore s2 = new semaphore(1);
 
 	public explorerAgent(String name, String type, EnvironmentInterfaceStandard ei1) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException
 	{
@@ -70,23 +71,21 @@ public class explorerAgent extends Thread {
 //		this.input = ret;
 //		System.out.println("Agent " + name + "'s input " + input);
 		String retString = "";
+		try {
+			s2.P();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		for (Percept percept : ret) {
 			retString = percept.toString();
 			if(retString.regionMatches(0, "visibleEdge", 0, 10)){
-				try {
-					edge(retString);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				edge(retString);
 			}
 			else if (retString.regionMatches(0, "position", 0, 7)){
-				try {
+
 					position(retString);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
 			}
 			else if (retString.regionMatches(0, "lastActionResult", 0, 15)){
 				lastActionResult(retString);	
@@ -96,6 +95,7 @@ public class explorerAgent extends Thread {
 				visibleEntity(retString);
 			}
 		}
+		s2.V();
 		System.out.println("done with recieveinput for agent " + name);
 		//		s1.V();
 	}
@@ -118,7 +118,7 @@ public class explorerAgent extends Thread {
 		}
 	}
 
-	private void position(String retString) throws InterruptedException {
+	private void position(String retString){
 		String position = "";
 		if (retString.regionMatches(11,")",0, 1)){
 			position = retString.substring(9, 11);
@@ -132,7 +132,7 @@ public class explorerAgent extends Thread {
 //		}
 	}
 
-	private void edge(String retString) throws InterruptedException {
+	private void edge(String retString){
 		String vertex1 = "";
 		String vertex2 = "";
 		vertex1 = findVertex(retString, 10);
@@ -140,14 +140,29 @@ public class explorerAgent extends Thread {
 		nodeUpdater(vertex1, vertex2);
 	}
 
-	private void nodeUpdater(String vertex1, String vertex2) throws InterruptedException {
+	private void nodeUpdater(String vertex1, String vertex2){
 		Node node1 = new Node(vertex1);
 		Node node2 = new Node(vertex2);
-		test.addNode(node1,node2);
-		node1 = test.getNode(vertex1);
-		node2 = test.getNode(vertex2);
-		node1.updateNode(node2);
-		node2.updateNode(node1);
+		try {
+			test.addNode(node1,node2);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			
+			node1 = test.getNode(vertex1);
+			node2 = test.getNode(vertex2);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		try {
+			node1.updateNode(node2);
+			node2.updateNode(node1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static String findVertex(String retString, int i) {
