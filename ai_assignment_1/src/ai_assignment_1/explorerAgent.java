@@ -30,59 +30,63 @@ public class explorerAgent extends Thread {
 	private semaphore s1 = new semaphore(0);
 	private Collection<Percept> input;
 	static Map<String, Collection<Percept>> percepts;
-	static Collection<Percept> ret;
+	private static Collection<Percept> ret;
 	static EnvironmentInterfaceStandard ei = null;
 
-
-
-	public explorerAgent(String name, String type) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException
+	public explorerAgent(String name, String type, EnvironmentInterfaceStandard ei1) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException
 	{
 		this.name = name;
 		this.type = type;
-		initiate();
+		this.ei = ei1;
 	}
-
 
 	public explorerAgent() {
 	}
 
-	public void bus() throws PerceiveException, NoEnvironmentException, InterruptedException{
-
-		while(true){
-			try {
-
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-
 	public void run() {
+		
+		try {
+			percieve();
+		} catch (PerceiveException | NoEnvironmentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-//		try {
-//			bus();
-//		} catch (PerceiveException | NoEnvironmentException | InterruptedException e1) {
-//			e1.printStackTrace();
+			recieveInput();
+
+		System.out.println("CKYEAH!");
+//		while(true){
+////			try {
+////				Thread.sleep(5000);
+////			} catch (InterruptedException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
 //		}
-
-
-	
-
 	}
 
-	public void recieveInput(Collection<Percept> ret) throws InterruptedException, PerceiveException, NoEnvironmentException{
-		this.input = ret;
-		System.out.println("Agent " + name + "'s input " + input);
+	@SuppressWarnings("deprecation")
+	public void recieveInput(){
+//		this.input = ret;
+//		System.out.println("Agent " + name + "'s input " + input);
 		String retString = "";
 		for (Percept percept : ret) {
 			retString = percept.toString();
 			if(retString.regionMatches(0, "visibleEdge", 0, 10)){
-				edge(retString);
+				try {
+					edge(retString);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			else if (retString.regionMatches(0, "position", 0, 7)){
-				position(retString);
+				try {
+					position(retString);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			else if (retString.regionMatches(0, "lastActionResult", 0, 15)){
 				lastActionResult(retString);	
@@ -92,16 +96,13 @@ public class explorerAgent extends Thread {
 				visibleEntity(retString);
 			}
 		}
-		bus();
+		System.out.println("done with recieveinput for agent " + name);
 		//		s1.V();
 	}
 
-
 	private void visibleEntity(String retString) {
 		// TODO Log hvilke modstandere er hvor.
-		
 	}
-
 
 	private void lastActionResult(String retString) {
 		if (retString.regionMatches(17,"successful",0, 9)){
@@ -115,9 +116,7 @@ public class explorerAgent extends Thread {
 			success = false;
 			res = false;
 		}
-
 	}
-
 
 	private void position(String retString) throws InterruptedException {
 		String position = "";
@@ -128,11 +127,10 @@ public class explorerAgent extends Thread {
 		} else if (retString.regionMatches(13,")",0, 1)){
 			position = retString.substring(9, 13);
 		}
-		for (Node node : newMain.getNodeDb()) {
-			if(node.getName().equals(position)) this.position = node;
-		}
+//		for (Node node : newMain.getNodeDb()) {
+//			if(node.getName().equals(position)) this.position = node;
+//		}
 	}
-
 
 	private void edge(String retString) throws InterruptedException {
 		String vertex1 = "";
@@ -145,11 +143,12 @@ public class explorerAgent extends Thread {
 	private void nodeUpdater(String vertex1, String vertex2) throws InterruptedException {
 		Node node1 = new Node(vertex1);
 		Node node2 = new Node(vertex2);
-		newMain.setNodeDb(node1,node2);
-		newMain.setNodeDb(node2,node1);
-
+		test.addNode(node1,node2);
+		node1 = test.getNode(vertex1);
+		node2 = test.getNode(vertex2);
+		node1.updateNode(node2);
+		node2.updateNode(node1);
 	}
-
 
 	private static String findVertex(String retString, int i) {
 		String edge = "";
@@ -164,7 +163,6 @@ public class explorerAgent extends Thread {
 		}
 		return edge;
 	}
-
 
 	public String getname(){
 		return name;
@@ -202,27 +200,16 @@ public class explorerAgent extends Thread {
 		this.visiblity = visiblity;
 	}
 
-
 	public Action getAction() {
 		return action;
 	}
-
 
 	public void setAction(Action action) {
 		this.action = action;
 	}
 
-
-	public void initiate() throws IOException, AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException{
-		String cn = "massim.eismassim.EnvironmentInterface";
-		ei = EILoader.fromClassName(cn);
-		ei.registerAgent(name);
-		ei.associateEntity(name,"connectionA" + name.charAt(1));	
-		ei.start();
-	}
-
 	public void percieve() throws PerceiveException, NoEnvironmentException{
-		percepts = ei.getAllPercepts("a1");
+		percepts = ei.getAllPercepts(name);
 		ret = new LinkedList<Percept>();
 		for ( Collection<Percept> ps : percepts.values() ) {
 			ret.addAll(ps);

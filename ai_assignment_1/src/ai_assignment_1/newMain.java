@@ -6,11 +6,14 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
+import eis.EILoader;
+import eis.EnvironmentInterfaceStandard;
 import eis.exceptions.AgentException;
 import eis.exceptions.ManagementException;
 import eis.exceptions.NoEnvironmentException;
 import eis.exceptions.PerceiveException;
 import eis.exceptions.RelationException;
+import eis.iilang.Percept;
 
 
 
@@ -21,9 +24,9 @@ public class newMain {
 	static explorerAgent agent = new explorerAgent();
 	static ArrayList<Node> nodeDb = new ArrayList<>();
 	static semaphore s1 = new semaphore(1);
-
+	static EnvironmentInterfaceStandard ei = null;
 	
-	public static ArrayList<Node> getNodeDb() throws InterruptedException {
+	/*public static ArrayList<Node> getNodeDb() throws InterruptedException {
 		return nodeDb;
 	}
 
@@ -40,19 +43,15 @@ public class newMain {
 			}
 		}
 		s1.V();
-	}
+	}*/
 	
-
-
 	public static void main(String[] args) throws AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, IOException {
 		inputThread it = new inputThread();
 		it.start();
 		
-		
 		String position = "";
 		String cn = "massim.eismassim.EnvironmentInterface";
-
-		
+		ei = EILoader.fromClassName(cn);
 		
 		explorerAgent a1 = new explorerAgent("a1", "Explorer");
 		explorerAgent a2 = new explorerAgent("a2", "Explorer");
@@ -74,8 +73,21 @@ public class newMain {
 		String tempName = "";
 		for (int i = 0; i < explorers.size(); i++) {
 			agent = (explorerAgent) explorers.get(i);
+			ei.registerAgent(agent.getname());
+			ei.associateEntity(agent.getname(),"connectionA" + agent.getname().charAt(1));	
 			agent.start();
 		}	
+		ei.start();
+		
+		Collection<Percept> input;
+		Map<String, Collection<Percept>> percepts;
+		Collection<Percept> ret;
+		
+		for (Object agent : explorers) {
+			percepts = ei.getAllPercepts("a1");
+		}
+		
+		
 	}
 
 }

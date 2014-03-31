@@ -21,35 +21,95 @@ public class test {
 	static explorerAgent agent = new explorerAgent();
 	static Map<String, Collection<Percept>> percepts;
 	static Collection<Percept> ret;
+	static ArrayList<Node> nodeDb = new ArrayList<>();
+	public static semaphore s1 = new semaphore(1);
 
+	public static ArrayList<Node> getNodeDb() throws InterruptedException {
+		ArrayList<Node> tempNodeDb = nodeDb;
+		return tempNodeDb;
+	}
+	
+	public static Node getNode(String nodeName) throws InterruptedException{
+		s1.P();
+		for (Node node : nodeDb) {
+			if(node.getName().equals(nodeName)){
+				s1.V();
+				return node;
+			}
+		}
+		s1.V();
+		return null;
+	}
+	
+	
+	public static void addNode(Node node1, Node node2) throws InterruptedException {
+		s1.P();
+		boolean flag1 = false;
+		boolean flag2 = false;
+		for (Node node : nodeDb) {
+			if(node.getName().equals(node1.getName())){
+				if(node.isSurveyed) {
+					s1.V();
+					return;
+				}
+				flag1 = true;
+			}
+			else if(node.getName().equals(node2.getName())){
+				if(node.isSurveyed) {
+					s1.V();
+					return;
+				}
+				flag2 = true;
+			}
+		}
+		s1.V();
+		if(!flag1){
+			s1.P();
+			nodeDb.add(node1);
+			s1.V();
+		}
+		if(!flag2){
+			s1.P();
+			nodeDb.add(node2);
+			s1.V();
+		}
+		
+	}
 
 	public static void main(String[] args) throws IOException, AgentException, RelationException, ManagementException, PerceiveException, NoEnvironmentException, InterruptedException {
 		EnvironmentInterfaceStandard ei1 = null;
-		EnvironmentInterfaceStandard ei2 = null;
-		EnvironmentInterfaceStandard ei3 = null;
-		EnvironmentInterfaceStandard ei4 = null;
-		EnvironmentInterfaceStandard ei5 = null;
-		EnvironmentInterfaceStandard ei6 = null;
-		EnvironmentInterfaceStandard ei7 = null;
-		EnvironmentInterfaceStandard ei8 = null;
+
 		String cn = "massim.eismassim.EnvironmentInterface";
 		ei1 = EILoader.fromClassName(cn);
-		ei2 = EILoader.fromClassName(cn);
-		ei3 = EILoader.fromClassName(cn);
-		ei4 = EILoader.fromClassName(cn);
-		ei5 = EILoader.fromClassName(cn);
-		ei6 = EILoader.fromClassName(cn);
-		ei7 = EILoader.fromClassName(cn);
-		ei8 = EILoader.fromClassName(cn);
 
-		explorerAgent a1 = new explorerAgent("a1", "Explorer");
-		explorerAgent a2 = new explorerAgent("a2", "Explorer");
-		explorerAgent a3 = new explorerAgent("a3", "Explorer");
-		explorerAgent a4 = new explorerAgent("a4", "Explorer");
-		explorerAgent a5 = new explorerAgent("a5", "Explorer");
-		explorerAgent a6 = new explorerAgent("a6", "Explorer");
-		explorerAgent a7 = new explorerAgent("a7", "Explorer");
-		explorerAgent a8 = new explorerAgent("a8", "Explorer");
+
+		ei1.registerAgent("a1");
+		ei1.associateEntity("a1","connectionA1");
+		ei1.registerAgent("a2");
+		ei1.associateEntity("a2","connectionA2");
+		ei1.registerAgent("a3");
+		ei1.associateEntity("a3","connectionA3");
+		ei1.registerAgent("a4");
+		ei1.associateEntity("a4","connectionA4");
+		ei1.registerAgent("a5");
+		ei1.associateEntity("a5","connectionA5");
+		ei1.registerAgent("a6");
+		ei1.associateEntity("a6","connectionA6");
+		ei1.registerAgent("a7");
+		ei1.associateEntity("a7","connectionA7");
+		ei1.registerAgent("a8");
+		ei1.associateEntity("a8","connectionA8");
+
+		explorerAgent a1 = new explorerAgent("a1", "Explorer", ei1);
+		explorerAgent a2 = new explorerAgent("a2", "Explorer", ei1);
+		explorerAgent a3 = new explorerAgent("a3", "Explorer", ei1);
+		explorerAgent a4 = new explorerAgent("a4", "Explorer", ei1);
+		explorerAgent a5 = new explorerAgent("a5", "Explorer", ei1);
+		explorerAgent a6 = new explorerAgent("a6", "Explorer", ei1);
+		explorerAgent a7 = new explorerAgent("a7", "Explorer", ei1);
+		explorerAgent a8 = new explorerAgent("a8", "Explorer", ei1);
+
+		ei1.start();
 		explorers.add(a1);
 		explorers.add(a2);
 		explorers.add(a3);
@@ -59,102 +119,12 @@ public class test {
 		explorers.add(a7);
 		explorers.add(a8);
 
+		for(int i = 0; i < explorers.size(); i++)
+		{
+			agent = (explorerAgent) explorers.get(i);
 
-		String tempName = "";
-		
-		ei1.registerAgent("a1");
-		ei1.associateEntity("a1", "connectionA1");
-		ei1.start();
-		ei2.registerAgent("a2");
-		ei2.associateEntity("a2", "connectionA2");
-		ei2.start();
-		ei3.registerAgent("a3");
-		ei3.associateEntity("a3", "connectionA3");
-		ei3.start();
-		ei4.registerAgent("a4");
-		ei4.associateEntity("a4", "connectionA4");
-		ei4.start();
-		ei5.registerAgent("a5");
-		ei5.associateEntity("a5", "connectionA5");
-		ei5.start();
-		ei6.registerAgent("a6");
-		ei6.associateEntity("a6", "connectionA6");
-		ei6.start();
-		ei7.registerAgent("a7");
-		ei7.associateEntity("a7", "connectionA7");
-		ei7.start();
-		ei8.registerAgent("a8");
-		ei8.associateEntity("a8", "connectionA8");
-		ei8.start();
-
-//		for (int i = 0; i < explorers.size(); i++) {
-//			agent = (explorerAgent) explorers.get(i);
-//			tempName = agent.getname();
-//			ei.registerAgent(tempName);
-//			ei.associateEntity(tempName,"connectionA" + tempName.charAt(1));
-//			agent.start();
-//		}	
-
-		percepts = ei1.getAllPercepts("a1");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
+			agent.start();
 		}
-		a1.recieveInput(ret);
-		percepts = ei2.getAllPercepts("a2");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
-		} 
-		a2.recieveInput(ret);
-		percepts = ei3.getAllPercepts("a3");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
-		} 
-		a3.recieveInput(ret);
-		percepts = ei4.getAllPercepts("a4");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
-		} 
-		a4.recieveInput(ret);
-		percepts = ei5.getAllPercepts("a5");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
-		} 
-		a5.recieveInput(ret);
-		percepts = ei6.getAllPercepts("a6");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
-		} 
-		a6.recieveInput(ret);
-		percepts = ei7.getAllPercepts("a7");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
-		} 
-		a7.recieveInput(ret);
-		percepts = ei8.getAllPercepts("a8");
-		ret = new LinkedList<Percept>();
-		for ( Collection<Percept> ps : percepts.values() ) {
-			ret.addAll(ps);
-		} 
-		a8.recieveInput(ret);
-
-//		for (int i = 0; i < explorers.size(); i++) {
-//			agent = (explorerAgent) explorers.get(i);
-//			tempName = agent.getname();
-//			
-//			ret = new LinkedList<Percept>();
-//			for ( Collection<Percept> ps : percepts.values() ) {
-//				ret.addAll(ps);
-//			} 
-//			System.out.println(ret);
-//		}
-
 	}
 
 }

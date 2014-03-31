@@ -6,57 +6,34 @@ import java.util.HashMap;
 
 public class Node {
 
-	int cost;
+	int value;
 	String name;
 	boolean isSurveyed;
 	boolean isProbed;
-
-	Node pred;
-	ArrayList<Node> succ = new ArrayList<>();
+	
+	ArrayList<edgeNode> nodeList = new ArrayList<>();
+	static semaphore s1 = new semaphore(1);
 	
 	public Node(String name){
 		this.name = name;
-		this.pred = null;
 	}
 
-	public ArrayList<Node> getSucc() {
-		return succ;
+	public ArrayList<edgeNode> getSucc() {
+		return nodeList;
 	}
 
 
-	public int getCost() {
-		return cost;
+	public int getValue() {
+		return value;
 	}
 
-	public void setCost(int cost) {
-		this.cost = cost;
+	public void setValue(int value) {
+		this.value = value;
 	}
 
-	public Node getPred() {
-		return pred;
-	}
-
-	public boolean hasGotPred() {
-		//System.out.println("Pred : " + pred);
-		if (pred == null){
-			return false;
-		} else {
-			return true;
-		}
-	}
-	
-	public void setPred(Node pred) {
-		this.pred = pred;
-	}
-	
-	public void clearPred() {
-		this.pred = null;
-	}
-	
 	public String getName() {
 		return name;
 	}
-
 
 	public boolean isSurveyed() {
 		return isSurveyed;
@@ -66,11 +43,35 @@ public class Node {
 		this.isSurveyed = isSurveyed;
 	}
 
-	public void updateNode(Node node1) {
-		for (Node node : succ) {
-			if(node.getName().equals(node1.getName())) succ.add(node);
+	public void updateNode(edgeNode node1) throws InterruptedException {
+		if(isSurveyed) return;
+		s1.P();
+		boolean flag = false;
+		for (edgeNode node : nodeList) {
+			if(node.getNode().getName().equals(node1.getNode().getName())){
+				if(node.getEdge()==0){
+					node.setEdge(node1.getEdge());
+				}
+				flag = true;
+			}
 		}
-		//TODO sæt edge cost når det er.
+		if(!flag){
+			nodeList.add(node1);
+		}
+		s1.V();
+	}
+	public void updateNode(Node node1) throws InterruptedException {
+		if(isSurveyed) return;
+		s1.P();
+		boolean flag = false;
+		for (edgeNode node : nodeList) {
+			if(node.getNode().getName().equals(node1.getName())) flag = true;
+		}
+		if(!flag){
+			edgeNode temp = new edgeNode(node1);
+			nodeList.add(temp);
+		}
+		s1.V();
 	}
 	
 	public boolean isProbed() {
