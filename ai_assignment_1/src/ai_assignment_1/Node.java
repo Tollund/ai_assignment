@@ -13,12 +13,13 @@ public class Node {
 	
 	ArrayList<edgeNode> nodeList = new ArrayList<>();
 	private static semaphore s1 = new semaphore(1);
+	private static semaphore s2 = new semaphore(1);
 	
 	public Node(String name){
 		this.name = name;
 	}
 
-	public ArrayList<edgeNode> getSucc() {
+	public ArrayList<edgeNode> getNodeList() {
 		return nodeList;
 	}
 
@@ -48,7 +49,6 @@ public class Node {
 		try {
 			s1.P();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		boolean flag = false;
@@ -70,7 +70,6 @@ public class Node {
 		try {
 			s1.P();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		boolean flag = false;

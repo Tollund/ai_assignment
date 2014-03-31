@@ -23,6 +23,7 @@ public class test {
 	static Collection<Percept> ret;
 	static ArrayList<Node> nodeDb = new ArrayList<>();
 	public static semaphore s1 = new semaphore(1);
+	public static semaphore s2 = new semaphore(1);
 
 	public static ArrayList<Node> getNodeDb() throws InterruptedException {
 		ArrayList<Node> tempNodeDb = nodeDb;

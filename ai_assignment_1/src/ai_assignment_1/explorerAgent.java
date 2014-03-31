@@ -59,6 +59,8 @@ public class explorerAgent extends Thread {
 		recieveInput();
 
 		Action move = new Action("survey");
+		for (int i = 0; i < 10; i++) {
+			
 		try {
 			ei.performAction(name, move);
 		} catch (ActException e) {
@@ -75,76 +77,111 @@ public class explorerAgent extends Thread {
 		}
 
 		recieveInput();
+		}
 	}
 
 	@SuppressWarnings("deprecation")
 	public void recieveInput(){
-		//		this.input = ret;
-		//		System.out.println("Agent " + name + "'s input " + input);
+
 		String retString = "";
+
+		for (Percept percept : ret) {
+
+			retString = percept.toString();
+			if(retString.regionMatches(0, "visibleEdge", 0, 10)){
+//					System.out.println("edgein " + name);
+					edge(retString);
+//					System.out.println("edgeout " + name);
+			}
+			else if (retString.regionMatches(0, "position", 0, 7)){
+//				System.out.println("posin " + name);
+				position(retString);
+//				System.out.println("posout " + name);
+
+			}
+			else if (retString.regionMatches(0, "lastActionResult", 0, 15)){
+//				System.out.println("lastin " + name);
+				lastActionResult(retString);	
+//				System.out.println("lastout " + name);
+			}
+			else if (retString.regionMatches(0, "visibleEntity", 0, 12)){
+//				System.out.println("visentin " + name);
+				visibleEntity(retString);
+//				System.out.println("visentout " + name);
+			}
+			else if (retString.regionMatches(0, "energy", 0, 5)){
+//				System.out.println("energyin " + name);
+				energyUpdate(retString);
+//				System.out.println("energyout " + name);
+			}
+			else if(retString.regionMatches(0, "surveyedEdge", 0, 11)){
+//				System.out.println("Surveyedin " + name);
+				surveyedEdge(retString);
+//				System.out.println("Surveyedout " + name);
+			}
+			else if(retString.regionMatches(0, "probedVertex", 0, 11)){
+				probedEdge(retString);
+			}
+		}
+		System.out.println("done with recieveinput for agent " + name);
+	}
+
+	private void probedEdge(String retString) {
+		String vertex1 = "";
+		int value;
+		vertex1 = findVertex(retString, 11);
+		value = findValue(retString, vertex1.length());
 		try {
-			s2.P();
+			Node temp = test.getNode(vertex1);
+			temp.setValue(value);
+			temp.setProbed(true);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for (Percept percept : ret) {
-			try {
-				s3.P();
-			} catch (InterruptedException e) {
+	}
 
-				e.printStackTrace();
-			}
-			retString = percept.toString();
-			if(retString.regionMatches(0, "visibleEdge", 0, 10)){
-					edge(retString);
-			}
-			else if (retString.regionMatches(0, "position", 0, 7)){
-				position(retString);
-
-			}
-			else if (retString.regionMatches(0, "lastActionResult", 0, 15)){
-				lastActionResult(retString);	
-
-			}
-			else if (retString.regionMatches(0, "visibleEntity", 0, 12)){
-				visibleEntity(retString);
-			}
-			else if (retString.regionMatches(0, "energy", 0, 5)){
-				energyUpdate(retString);
-			}
-			else if(retString.regionMatches(0, "surveyedEdge", 0, 11)){
-				surveyedEdge(retString);
-			}
-			s3.V();
+	private int findValue(String retString, int i) {
+		String value = "";
+		if (retString.regionMatches(15+i,")",0, 1)){
+			value = retString.substring(14+i, 15+i);
+		} else if (retString.regionMatches(16+i,")",0, 1)){
+			value = retString.substring(14+i, 16+i);
 		}
-		s2.V();
-		System.out.println("done with recieveinput for agent " + name);
-		//		s1.V();
+		return Integer.parseInt(value);
 	}
 
 	private void surveyedEdge(String retString) {
 		String vertex1 = "";
 		String vertex2 = "";
-		String weight = "";
-		System.out.println("er i surveyededge");
-		vertex1 = findVertex(retString, 10);
-		vertex2 = findVertex(retString, 11+vertex1.length());
-		weight = findWeight(retString, 12+vertex1.length()+vertex2.length());
+		int weight;
+		vertex1 = findVertex(retString, 11);
+		vertex2 = findVertex(retString, 12+vertex1.length());
+		weight = findWeight(retString, vertex1.length()+vertex2.length());
+		try {
+			Node temp1 = test.getNode(vertex1);
+			Node temp2 = test.getNode(vertex2);
+			temp1.setSurveyed(true);
+			edgeNode temp3 = new edgeNode(temp1,weight);
+			edgeNode temp4 = new edgeNode(temp2,weight);
+			temp1.updateNode(temp3);
+			temp2.updateNode(temp4);
+			System.out.println("Har surveyed");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
-	private String findWeight(String retString, int i) {
+	private int findWeight(String retString, int i) {
 		String weight = "";
-		System.out.println("Er i vægt");
-		System.out.println(retString);
-		if (retString.regionMatches(14+i,")",0, 1)){
-			weight = retString.substring(14+i, 15+i);
-			System.out.println("Vægten er " + weight);
-		} else if (retString.regionMatches(15+i,")",0, 1)){
-			weight = retString.substring(14+i, 16+i);
-			System.out.println("Vægten er " + weight);
+		if (retString.regionMatches(16+i,")",0, 1)){
+			weight = retString.substring(15+i, 16+i);
+		} else if (retString.regionMatches(17+i,")",0, 1)){
+			weight = retString.substring(15+i, 17+i);
 		}
-		return weight;
+		return Integer.parseInt(weight);
 	}
 
 	private void energyUpdate(String retString) {
@@ -164,10 +201,8 @@ public class explorerAgent extends Thread {
 
 	private void lastActionResult(String retString) {
 		if (retString.regionMatches(17,"successful",0, 9)){
-			System.out.println("Success");
 			success = true;
 		} else if (retString.regionMatches(17,"failed_res",0, 9)){
-			System.out.println("Fail");
 			success = false;
 			res = true;
 		} else {
@@ -178,11 +213,11 @@ public class explorerAgent extends Thread {
 
 	private void position(String retString){
 		String position = "";
-		if (retString.regionMatches(12,")",0, 1)){
+		if (retString.regionMatches(11,")",0, 1)){
 			position = retString.substring(9, 11);
-		} else if (retString.regionMatches(13,")",0, 1)){
+		} else if (retString.regionMatches(12,")",0, 1)){
 			position = retString.substring(9, 12);
-		} else if (retString.regionMatches(14,")",0, 1)){
+		} else if (retString.regionMatches(13,")",0, 1)){
 			position = retString.substring(9, 13);
 		}
 		try {
@@ -195,13 +230,11 @@ public class explorerAgent extends Thread {
 			for (Node node : test.getNodeDb()) {
 				if(node.getName().equals(position)){
 					this.position = node;
-					System.out.println("Sætter position til " + this.position.getName());
 					test.s1.V();
 					return;
 				}
 			}
 			this.position = new Node(position);
-			System.out.println("Sætter position til " + this.position.getName());
 			test.addNode(this.position);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -214,7 +247,7 @@ public class explorerAgent extends Thread {
 		String vertex1 = "";
 		String vertex2 = "";
 		vertex1 = findVertex(retString, 10);
-		vertex2 = findVertex(retString, 11+vertex1.length());
+		vertex2 = findEndVertex(retString, 11+vertex1.length());
 		nodeUpdater(vertex1, vertex2);
 	}
 
@@ -243,7 +276,7 @@ public class explorerAgent extends Thread {
 	private static String findVertex(String retString, int i) {
 		String edge = "";
 		//TODO fix slutparanthes på visibleedge
-		if(retString.regionMatches(0, "visibleEdge", 0, 10)){
+
 			if (retString.regionMatches(i+4,",",0, 1)){
 				edge = retString.substring(i+2, i+4);
 			}else if (retString.regionMatches(i+5,",",0, 1)){
@@ -251,9 +284,25 @@ public class explorerAgent extends Thread {
 			}else if (retString.regionMatches(i+6,",",0, 1)){
 				edge = retString.substring(i+2, i+6);
 			}
-		}
+		
 		return edge;
 	}
+	
+	private static String findEndVertex(String retString, int i) {
+		String edge = "";
+		//TODO fix slutparanthes på visibleedge
+
+			if (retString.regionMatches(i+4,")",0, 1)){
+				edge = retString.substring(i+2, i+4);
+			}else if (retString.regionMatches(i+5,")",0, 1)){
+				edge = retString.substring(i+2, i+5);
+			}else if (retString.regionMatches(i+6,")",0, 1)){
+				edge = retString.substring(i+2, i+6);
+			}
+		
+		return edge;
+	}
+
 
 	public String getname(){
 		return name;
@@ -300,10 +349,17 @@ public class explorerAgent extends Thread {
 	}
 
 	public void percieve() throws PerceiveException, NoEnvironmentException{
+		try {
+			test.s2.P();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		percepts = ei.getAllPercepts(name);
 		ret = new LinkedList<Percept>();
 		for ( Collection<Percept> ps : percepts.values() ) {
 			ret.addAll(ps);
 		}
+		test.s2.V();
 	}
 }
