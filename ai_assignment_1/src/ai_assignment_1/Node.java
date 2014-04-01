@@ -11,24 +11,18 @@ public class Node {
 	boolean isSurveyed;
 	boolean isProbed;
 	boolean isBeingProbed;
-	
-	private ArrayList<edgeNode> nodeList;
+
 	private static semaphore s1;
 	private static semaphore s2;
-	
-	
+
+
 	public Node(String name){
 		this.name = name;
 		this.isBeingProbed = false;
 		this.isProbed = false;
 		this.isSurveyed = false;
-		this.nodeList = new ArrayList<>();
 		this.s1 = new semaphore(1);
 		this.s2 = new semaphore(1);
-	}
-
-	public ArrayList<edgeNode> getNodeList() {
-		return nodeList;
 	}
 
 	public int getValue() {
@@ -51,68 +45,66 @@ public class Node {
 		this.isSurveyed = isSurveyed;
 	}
 
-	
-	public void addNodeToList(Node addedNode){
+	public void addNodeToDB(Node addedNode){
 		try {
 			s1.P();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
-		boolean isInList = false;
-		String addedName = "";
-		String searchName = "";
-		addedName = addedNode.getName();
-		for (edgeNode eN : nodeList) {
-			searchName = eN.getNode().getName();
-			System.out.println("Searchname: " + searchName);
-			System.out.println("addedname: " + addedName);
-			if(searchName.equals(addedName)){
-				
-				isInList = true;
+		boolean inDB = false;
+		String addedNodeName = addedNode.getName();
+		String dbNodeName = "";
+		try {
+			for (agentMap aM : test.getNodeDb()) {
+				dbNodeName = aM.getMainNode().getName();
+				if(dbNodeName.equals(addedNodeName)){
+					inDB = true;
+					s1.V();
+					return;
+				}
 			}
-		}		
-		for (edgeNode eN : nodeList) {
-			System.out.println("Nodelistindhold before :" + eN.getNode().getName() + " for " + name);
+			if(!inDB){
+				agentMap newAgentMap = new agentMap(addedNode, new ArrayList<edge>());
+				test.getNodeDb().add(newAgentMap);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		if(!isInList){
-			edgeNode addedEN = new edgeNode(addedNode);
-			System.out.println("Adding " + addedName + " to " + name);
-			this.nodeList.add(addedEN);
-		}
-		for (edgeNode eN : nodeList) {
-			System.out.println("Nodelistindhold after :" + eN.getNode().getName() + " for " + name);
-		}
-		s1.V();
 	}
-	public void addEdgeToNode(Node addedNode, int weight) {
+	
+	public void addEdgeToMap(Node addedNode, int weight){
 		try {
 			s1.P();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		boolean inNodeList = false;
+		boolean inEdge = false;
 		String addedNodeName = addedNode.getName();
 		String edgeNodeName = "";
-		for (edgeNode eN : this.nodeList) {
-			edgeNodeName = eN.getNode().getName();
-			if(edgeNodeName.equals(addedNodeName)){
-				eN.setEdge(weight);
-				inNodeList = true;
+		if(test.getAgentMapForNode(this.getName()) != null){
+			for (edge edgeInAM : test.getAgentMapForNode(this.getName()).getEdgeList()) {
+				edgeNodeName = edgeInAM.getNode().getName();
+				if(edgeNodeName.equals(addedNodeName)){
+					edgeInAM.setEdge(weight);
+					inEdge = true;
+				}
 			}
 		}
-		if(!inNodeList){
-			edgeNode newEdgeNode = new edgeNode(addedNode,weight);
+		if(!inEdge){
+			edge newEdge = new edge(addedNode, weight);
+			System.out.println("Adding the node " + addedNodeName + " to the edgeList of " + this.getName());
+			test.getAgentMapForNode(this.name).addToEdgeList(newEdge);
 		}
 		s1.V();
 	}
-	
+
 
 	public boolean isProbed() {
 		return isProbed;
 	}
-	
+
 	public void setProbed(boolean isProbed) {
 		this.isProbed = isProbed;
 	}
@@ -124,7 +116,4 @@ public class Node {
 	public void setBeingProbed(boolean isBeingProbed) {
 		this.isBeingProbed = isBeingProbed;
 	}
-
-
-
 }

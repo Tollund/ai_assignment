@@ -59,6 +59,16 @@ public class explorerAgent extends Thread implements Runnable {
 				e.printStackTrace();
 			}
 			recieveInput();
+			
+			try {
+				for (agentMap aM : test.getNodeDb()) {
+					System.out.println("Printer edgeList for node " + aM.getMainNode().getName());
+					aM.printEdgeList();
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 //			action = canProbe();
 //			if(action != null){
 //				try {
@@ -74,40 +84,40 @@ public class explorerAgent extends Thread implements Runnable {
 
 	}
 
-	public Action canProbe(){
-		Action probeAction;
-		if(!this.position.isProbed && energy > 2 && !this.position.isBeingProbed){
-			this.position.setBeingProbed(true);
-			probeAction = new Action("probe");
-			//			System.out.println("Probing my own pos");
-			//			for (edgeNode node : position.getNodeList()) {
-			//				System.out.println("Agent " + name + " har " + node.getNode().getName() + " i sin liste");
-			//			}
-			return probeAction;
-		} else if(this.position.isProbed && energy > 2){
-			for (edgeNode eN : this.position.getNodeList()) {
-				//				System.out.println("Agent " + name + " prøver at probe: " + eN.getNode().getName());
-				if(!eN.getNode().isProbed && !eN.getNode().isBeingProbed){
-					eN.getNode().setBeingProbed(true);
-					probeAction = new Action("probe",new Identifier(eN.getNode().getName()));
-					return probeAction;
-				}
-			}
-		} else if(this.position.isProbed && energy > 2){
-			for (edgeNode eN1 : this.position.getNodeList()) {
-				if(eN1.getNode().isProbed){
-					for (edgeNode eN2 : eN1.getNode().getNodeList()) {
-						if(!eN2.getNode().isProbed && !eN2.getNode().isBeingProbed){
-							eN2.getNode().setBeingProbed(true);
-							probeAction = new Action("probe", new Identifier(eN2.getNode().getName()));
-							return probeAction;
-						}
-					}
-				}
-			}
-		}
-		return null;
-	}
+//	public Action canProbe(){
+//		Action probeAction;
+//		if(!this.position.isProbed && energy > 2 && !this.position.isBeingProbed){
+//			this.position.setBeingProbed(true);
+//			probeAction = new Action("probe");
+//			//			System.out.println("Probing my own pos");
+//			//			for (edgeNode node : position.getNodeList()) {
+//			//				System.out.println("Agent " + name + " har " + node.getNode().getName() + " i sin liste");
+//			//			}
+//			return probeAction;
+//		} else if(this.position.isProbed && energy > 2){
+//			for (edge eN : this.position.getEdgeList()) {
+//				//				System.out.println("Agent " + name + " prøver at probe: " + eN.getNode().getName());
+//				if(!eN.getNode().isProbed && !eN.getNode().isBeingProbed){
+//					eN.getNode().setBeingProbed(true);
+//					probeAction = new Action("probe",new Identifier(eN.getNode().getName()));
+//					return probeAction;
+//				}
+//			}
+//		} else if(this.position.isProbed && energy > 2){
+//			for (edge eN1 : this.position.getEdgeList()) {
+//				if(eN1.getNode().isProbed){
+//					for (edge eN2 : eN1.getNode().getEdgeList()) {
+//						if(!eN2.getNode().isProbed && !eN2.getNode().isBeingProbed){
+//							eN2.getNode().setBeingProbed(true);
+//							probeAction = new Action("probe", new Identifier(eN2.getNode().getName()));
+//							return probeAction;
+//						}
+//					}
+//				}
+//			}
+//		}
+//		return null;
+//	}
 
 	@SuppressWarnings("deprecation")
 	public void recieveInput(){
@@ -162,8 +172,10 @@ public class explorerAgent extends Thread implements Runnable {
 		value = findValue(retString, vertex1.length());
 		try {
 			Node temp = test.getNode(vertex1);
+			if(temp!=null){
 			temp.setValue(value);
 			temp.setProbed(true);
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -190,8 +202,8 @@ public class explorerAgent extends Thread implements Runnable {
 			Node temp1 = test.getNode(vertex1);
 			Node temp2 = test.getNode(vertex2);
 			temp1.setSurveyed(true);
-			temp1.addEdgeToNode(temp2, weight);
-			temp2.addEdgeToNode(temp1, weight);
+			temp1.addEdgeToMap(temp2, weight);
+			temp2.addEdgeToMap(temp1, weight);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -259,8 +271,8 @@ public class explorerAgent extends Thread implements Runnable {
 		try {
 			Node temp1 = test.getNode(vertex1);
 			Node temp2 = test.getNode(vertex2);
-			temp1.addNodeToList(temp2);
-			temp2.addNodeToList(temp1);
+			temp1.addEdgeToMap((temp2),0);;
+			temp2.addEdgeToMap((temp1),0);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

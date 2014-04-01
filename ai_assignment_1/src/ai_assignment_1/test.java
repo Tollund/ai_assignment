@@ -21,24 +21,40 @@ public class test {
 	static explorerAgent agent = new explorerAgent();
 	static Map<String, Collection<Percept>> percepts;
 	static Collection<Percept> ret;
-	static ArrayList<Node> nodeDb = new ArrayList<>();
+	public static ArrayList<agentMap> nodeDb = new ArrayList<>();
 	public static semaphore s1 = new semaphore(1);
 	public static semaphore s2 = new semaphore(1);
 
-	public static ArrayList<Node> getNodeDb() throws InterruptedException {
-		ArrayList<Node> tempNodeDb = nodeDb;
+	public static ArrayList<agentMap> getNodeDb() throws InterruptedException {
+		ArrayList<agentMap> tempNodeDb = nodeDb;
 		return tempNodeDb;
 	}
 
 	public static Node getNode(String nodeName) throws InterruptedException{
 		s1.P();
-		for (Node nodeInDB : nodeDb) {
-			if(nodeInDB.getName().equals(nodeName)){
+		for (agentMap nodeInDB : nodeDb) {
+			if(nodeInDB.getMainNode().getName().equals(nodeName)){
+				s1.V();
+				return nodeInDB.getMainNode();
+			}
+		}
+		s1.V();
+		return null;
+	}
+	
+	public static agentMap getAgentMapForNode(String nodeName){
+		try {
+			s1.P();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (agentMap nodeInDB : nodeDb) {
+			if(nodeInDB.getMainNode().getName().equals(nodeName)){
 				s1.V();
 				return nodeInDB;
 			}
 		}
-		s1.V();
 		return null;
 	}
 	
@@ -51,16 +67,17 @@ public class test {
 		}
 		String dbNodename = "";
 		boolean isInDB = false;
-		for (Node nodeInDB : nodeDb) {
-			dbNodename = nodeInDB.getName();
+		for (agentMap nodeInDB : nodeDb) {
+			dbNodename = nodeInDB.getMainNode().getName();
 			if(dbNodename.equals(nodeToCreate)){
 				isInDB = true;
 			}
 		}
 		if(!isInDB){
 			Node newNode = new Node(nodeToCreate);
-			System.out.println("Node " + nodeToCreate + " created");
-			nodeDb.add(newNode);
+			agentMap newAgentMap = new agentMap(newNode, new ArrayList<edge>());
+			System.out.println("agentMap for " + nodeToCreate + " created");
+			nodeDb.add(newAgentMap);
 		}
 		s1.V();
 	}
