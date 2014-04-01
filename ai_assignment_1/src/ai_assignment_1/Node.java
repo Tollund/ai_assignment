@@ -10,19 +10,26 @@ public class Node {
 	String name;
 	boolean isSurveyed;
 	boolean isProbed;
+	boolean isBeingProbed;
 	
-	ArrayList<edgeNode> nodeList = new ArrayList<>();
-	private static semaphore s1 = new semaphore(1);
-	private static semaphore s2 = new semaphore(1);
+	private ArrayList<edgeNode> nodeList;
+	private static semaphore s1;
+	private static semaphore s2;
+	
 	
 	public Node(String name){
 		this.name = name;
+		this.isBeingProbed = false;
+		this.isProbed = false;
+		this.isSurveyed = false;
+		this.nodeList = new ArrayList<>();
+		this.s1 = new semaphore(1);
+		this.s2 = new semaphore(1);
 	}
 
 	public ArrayList<edgeNode> getNodeList() {
 		return nodeList;
 	}
-
 
 	public int getValue() {
 		return value;
@@ -44,45 +51,64 @@ public class Node {
 		this.isSurveyed = isSurveyed;
 	}
 
-	public void updateNode(edgeNode node1){
-		if(isSurveyed) return;
+	
+	public void addNodeToList(Node addedNode){
 		try {
 			s1.P();
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		boolean flag = false;
-		for (edgeNode node : nodeList) {
-			if(node.getNode().getName().equals(node1.getNode().getName())){
-				if(node.getEdge()==0){
-					node.setEdge(node1.getEdge());
-				}
-				flag = true;
+		boolean isInList = false;
+		String addedName = "";
+		String searchName = "";
+		addedName = addedNode.getName();
+		for (edgeNode eN : nodeList) {
+			searchName = eN.getNode().getName();
+			System.out.println("Searchname: " + searchName);
+			System.out.println("addedname: " + addedName);
+			if(searchName.equals(addedName)){
+				
+				isInList = true;
 			}
+		}		
+		for (edgeNode eN : nodeList) {
+			System.out.println("Nodelistindhold before :" + eN.getNode().getName() + " for " + name);
 		}
-		if(!flag){
-			nodeList.add(node1);
+		if(!isInList){
+			edgeNode addedEN = new edgeNode(addedNode);
+			System.out.println("Adding " + addedName + " to " + name);
+			this.nodeList.add(addedEN);
+		}
+		for (edgeNode eN : nodeList) {
+			System.out.println("Nodelistindhold after :" + eN.getNode().getName() + " for " + name);
 		}
 		s1.V();
 	}
-	public void updateNode(Node node1){
-		if(isSurveyed) return;
+	public void addEdgeToNode(Node addedNode, int weight) {
 		try {
 			s1.P();
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		boolean flag = false;
-		for (edgeNode node : nodeList) {
-			if(node.getNode().getName().equals(node1.getName())) flag = true;
+		boolean inNodeList = false;
+		String addedNodeName = addedNode.getName();
+		String edgeNodeName = "";
+		for (edgeNode eN : this.nodeList) {
+			edgeNodeName = eN.getNode().getName();
+			if(edgeNodeName.equals(addedNodeName)){
+				eN.setEdge(weight);
+				inNodeList = true;
+			}
 		}
-		if(!flag){
-			edgeNode temp = new edgeNode(node1);
-			nodeList.add(temp);
+		if(!inNodeList){
+			edgeNode newEdgeNode = new edgeNode(addedNode,weight);
 		}
 		s1.V();
 	}
 	
+
 	public boolean isProbed() {
 		return isProbed;
 	}
@@ -90,4 +116,15 @@ public class Node {
 	public void setProbed(boolean isProbed) {
 		this.isProbed = isProbed;
 	}
+
+	public boolean isBeingProbed() {
+		return isBeingProbed;
+	}
+
+	public void setBeingProbed(boolean isBeingProbed) {
+		this.isBeingProbed = isBeingProbed;
+	}
+
+
+
 }

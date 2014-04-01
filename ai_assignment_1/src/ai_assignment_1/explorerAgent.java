@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.w3c.dom.NodeList;
+
 import eis.EILoader;
 import eis.EnvironmentInterfaceStandard;
 import eis.exceptions.ActException;
@@ -18,7 +20,7 @@ import eis.iilang.Action;
 import eis.iilang.Identifier;
 import eis.iilang.Percept;
 
-public class explorerAgent extends Thread {
+public class explorerAgent extends Thread implements Runnable {
 
 	private String name;
 	private String type;
@@ -48,36 +50,63 @@ public class explorerAgent extends Thread {
 	}
 
 	public void run() {
+		Action action;
+		while(true){
+			try {
+				percieve();
+			} catch (PerceiveException | NoEnvironmentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			recieveInput();
+//			action = canProbe();
+//			if(action != null){
+//				try {
+//					ei.performAction(name, action);
+//				} catch (ActException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
 
-		try {
-			percieve();
-		} catch (PerceiveException | NoEnvironmentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
 		}
 
-		recieveInput();
+	}
 
-		Action move = new Action("survey");
-		for (int i = 0; i < 10; i++) {
-			
-		try {
-			ei.performAction(name, move);
-		} catch (ActException e) {
-			//e.printStackTrace();
+	public Action canProbe(){
+		Action probeAction;
+		if(!this.position.isProbed && energy > 2 && !this.position.isBeingProbed){
+			this.position.setBeingProbed(true);
+			probeAction = new Action("probe");
+			//			System.out.println("Probing my own pos");
+			//			for (edgeNode node : position.getNodeList()) {
+			//				System.out.println("Agent " + name + " har " + node.getNode().getName() + " i sin liste");
+			//			}
+			return probeAction;
+		} else if(this.position.isProbed && energy > 2){
+			for (edgeNode eN : this.position.getNodeList()) {
+				//				System.out.println("Agent " + name + " prøver at probe: " + eN.getNode().getName());
+				if(!eN.getNode().isProbed && !eN.getNode().isBeingProbed){
+					eN.getNode().setBeingProbed(true);
+					probeAction = new Action("probe",new Identifier(eN.getNode().getName()));
+					return probeAction;
+				}
+			}
+		} else if(this.position.isProbed && energy > 2){
+			for (edgeNode eN1 : this.position.getNodeList()) {
+				if(eN1.getNode().isProbed){
+					for (edgeNode eN2 : eN1.getNode().getNodeList()) {
+						if(!eN2.getNode().isProbed && !eN2.getNode().isBeingProbed){
+							eN2.getNode().setBeingProbed(true);
+							probeAction = new Action("probe", new Identifier(eN2.getNode().getName()));
+							return probeAction;
+						}
+					}
+				}
+			}
 		}
-		try {
-			percieve();
-		} catch (PerceiveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoEnvironmentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		recieveInput();
-		}
+		return null;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -88,42 +117,42 @@ public class explorerAgent extends Thread {
 		for (Percept percept : ret) {
 
 			retString = percept.toString();
+
 			if(retString.regionMatches(0, "visibleEdge", 0, 10)){
-//					System.out.println("edgein " + name);
-					edge(retString);
-//					System.out.println("edgeout " + name);
+				//					System.out.println("edgein " + name);
+				edge(retString);
+				//					System.out.println("edgeout " + name);
 			}
 			else if (retString.regionMatches(0, "position", 0, 7)){
-//				System.out.println("posin " + name);
+				//				System.out.println("posin " + name);
 				position(retString);
-//				System.out.println("posout " + name);
+				//				System.out.println("posout " + name);
 
 			}
 			else if (retString.regionMatches(0, "lastActionResult", 0, 15)){
-//				System.out.println("lastin " + name);
+				//				System.out.println("lastin " + name);
 				lastActionResult(retString);	
-//				System.out.println("lastout " + name);
+				//				System.out.println("lastout " + name);
 			}
 			else if (retString.regionMatches(0, "visibleEntity", 0, 12)){
-//				System.out.println("visentin " + name);
+				//				System.out.println("visentin " + name);
 				visibleEntity(retString);
-//				System.out.println("visentout " + name);
+				//				System.out.println("visentout " + name);
 			}
 			else if (retString.regionMatches(0, "energy", 0, 5)){
-//				System.out.println("energyin " + name);
+				//				System.out.println("energyin " + name);
 				energyUpdate(retString);
-//				System.out.println("energyout " + name);
+				//				System.out.println("energyout " + name);
 			}
 			else if(retString.regionMatches(0, "surveyedEdge", 0, 11)){
-//				System.out.println("Surveyedin " + name);
+				//				System.out.println("Surveyedin " + name);
 				surveyedEdge(retString);
-//				System.out.println("Surveyedout " + name);
+				//				System.out.println("Surveyedout " + name);
 			}
 			else if(retString.regionMatches(0, "probedVertex", 0, 11)){
 				probedEdge(retString);
 			}
 		}
-		System.out.println("done with recieveinput for agent " + name);
 	}
 
 	private void probedEdge(String retString) {
@@ -136,7 +165,6 @@ public class explorerAgent extends Thread {
 			temp.setValue(value);
 			temp.setProbed(true);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -162,16 +190,12 @@ public class explorerAgent extends Thread {
 			Node temp1 = test.getNode(vertex1);
 			Node temp2 = test.getNode(vertex2);
 			temp1.setSurveyed(true);
-			edgeNode temp3 = new edgeNode(temp1,weight);
-			edgeNode temp4 = new edgeNode(temp2,weight);
-			temp1.updateNode(temp3);
-			temp2.updateNode(temp4);
-			System.out.println("Har surveyed");
+			temp1.addEdgeToNode(temp2, weight);
+			temp2.addEdgeToNode(temp1, weight);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private int findWeight(String retString, int i) {
@@ -220,27 +244,9 @@ public class explorerAgent extends Thread {
 		} else if (retString.regionMatches(13,")",0, 1)){
 			position = retString.substring(9, 13);
 		}
-		try {
-			test.s1.P();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			for (Node node : test.getNodeDb()) {
-				if(node.getName().equals(position)){
-					this.position = node;
-					test.s1.V();
-					return;
-				}
-			}
-			this.position = new Node(position);
-			test.addNode(this.position);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		test.s1.V();
+
+		test.createNode(position);
+
 	}
 
 	private void edge(String retString){
@@ -248,61 +254,69 @@ public class explorerAgent extends Thread {
 		String vertex2 = "";
 		vertex1 = findVertex(retString, 10);
 		vertex2 = findEndVertex(retString, 11+vertex1.length());
-		nodeUpdater(vertex1, vertex2);
-	}
-
-	private void nodeUpdater(String vertex1, String vertex2){
-		Node node1 = new Node(vertex1);
-		Node node2 = new Node(vertex2);
+		test.createNode(vertex1);
+		test.createNode(vertex2);
 		try {
-			test.addNode(node1,node2);
+			Node temp1 = test.getNode(vertex1);
+			Node temp2 = test.getNode(vertex2);
+			temp1.addNodeToList(temp2);
+			temp2.addNodeToList(temp1);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			if(test.getNode(vertex1)!=null){
-				node1 = test.getNode(vertex1);
-			}
-			if(test.getNode(vertex2)!=null){
-				node2 = test.getNode(vertex2);
-			}
-		} catch (Exception e) {
-		}
-		node1.updateNode(node2);
-		node2.updateNode(node1);
 	}
+
+	//	private void nodeUpdater(String vertex1, String vertex2){
+	//		Node node1 = new Node(vertex1);
+	//		Node node2 = new Node(vertex2);
+	//		try {
+	//			test.addNode(node1,node2);
+	//		} catch (InterruptedException e) {
+	//			e.printStackTrace();
+	//		}
+	//		try {
+	//			if(test.getNode(vertex1)!=null){
+	//				node1 = test.getNode(vertex1);
+	//			}
+	//			if(test.getNode(vertex2)!=null){
+	//				node2 = test.getNode(vertex2);
+	//			}
+	//		} catch (Exception e) {
+	//		}
+	//		System.out.println("Navnene på nodes");
+	//		System.out.println("Node " + node2.getName() + " is trying to be added to " + node1.getName());
+	//		node1.addNodeToList(node2);
+	//
+	//	}
 
 	private static String findVertex(String retString, int i) {
 		String edge = "";
-		//TODO fix slutparanthes på visibleedge
 
-			if (retString.regionMatches(i+4,",",0, 1)){
-				edge = retString.substring(i+2, i+4);
-			}else if (retString.regionMatches(i+5,",",0, 1)){
-				edge = retString.substring(i+2, i+5);
-			}else if (retString.regionMatches(i+6,",",0, 1)){
-				edge = retString.substring(i+2, i+6);
-			}
-		
+		if (retString.regionMatches(i+4,",",0, 1)){
+			edge = retString.substring(i+2, i+4);
+		}else if (retString.regionMatches(i+5,",",0, 1)){
+			edge = retString.substring(i+2, i+5);
+		}else if (retString.regionMatches(i+6,",",0, 1)){
+			edge = retString.substring(i+2, i+6);
+		}
+
 		return edge;
 	}
-	
+
 	private static String findEndVertex(String retString, int i) {
 		String edge = "";
-		//TODO fix slutparanthes på visibleedge
 
-			if (retString.regionMatches(i+4,")",0, 1)){
-				edge = retString.substring(i+2, i+4);
-			}else if (retString.regionMatches(i+5,")",0, 1)){
-				edge = retString.substring(i+2, i+5);
-			}else if (retString.regionMatches(i+6,")",0, 1)){
-				edge = retString.substring(i+2, i+6);
-			}
-		
+		if (retString.regionMatches(i+4,")",0, 1)){
+			edge = retString.substring(i+2, i+4);
+		}else if (retString.regionMatches(i+5,")",0, 1)){
+			edge = retString.substring(i+2, i+5);
+		}else if (retString.regionMatches(i+6,")",0, 1)){
+			edge = retString.substring(i+2, i+6);
+		}
+
 		return edge;
 	}
-
 
 	public String getname(){
 		return name;
@@ -352,7 +366,6 @@ public class explorerAgent extends Thread {
 		try {
 			test.s2.P();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		percepts = ei.getAllPercepts(name);
