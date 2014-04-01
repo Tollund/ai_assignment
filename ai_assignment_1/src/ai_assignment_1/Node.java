@@ -55,7 +55,7 @@ public class Node {
 		String addedNodeName = addedNode.getName();
 		String dbNodeName = "";
 		try {
-			for (agentMap aM : test.getNodeDb()) {
+			for (agentMap aM : main.getNodeDb()) {
 				dbNodeName = aM.getMainNode().getName();
 				if(dbNodeName.equals(addedNodeName)){
 					inDB = true;
@@ -65,7 +65,7 @@ public class Node {
 			}
 			if(!inDB){
 				agentMap newAgentMap = new agentMap(addedNode, new ArrayList<edge>());
-				test.getNodeDb().add(newAgentMap);
+				main.getNodeDb().add(newAgentMap);
 			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -83,8 +83,8 @@ public class Node {
 		boolean inEdge = false;
 		String addedNodeName = addedNode.getName();
 		String edgeNodeName = "";
-		if(test.getAgentMapForNode(this.getName()) != null){
-			for (edge edgeInAM : test.getAgentMapForNode(this.getName()).getEdgeList()) {
+		if(main.getAgentMapForNode(this.getName()) != null){
+			for (edge edgeInAM : main.getAgentMapForNode(this.getName()).getEdgeList()) {
 				edgeNodeName = edgeInAM.getNode().getName();
 				if(edgeNodeName.equals(addedNodeName)){
 					edgeInAM.setEdge(weight);
@@ -95,7 +95,7 @@ public class Node {
 		if(!inEdge){
 			edge newEdge = new edge(addedNode, weight);
 			System.out.println("Adding the node " + addedNodeName + " to the edgeList of " + this.getName());
-			test.getAgentMapForNode(this.name).addToEdgeList(newEdge);
+			main.getAgentMapForNode(this.name).addToEdgeList(newEdge);
 		}
 		s1.V();
 	}

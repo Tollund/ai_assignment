@@ -61,7 +61,7 @@ public class explorerAgent extends Thread implements Runnable {
 			recieveInput();
 			
 			try {
-				for (agentMap aM : test.getNodeDb()) {
+				for (agentMap aM : main.getNodeDb()) {
 					System.out.println("Printer edgeList for node " + aM.getMainNode().getName());
 					aM.printEdgeList();
 				}
@@ -171,7 +171,7 @@ public class explorerAgent extends Thread implements Runnable {
 		vertex1 = findVertex(retString, 11);
 		value = findValue(retString, vertex1.length());
 		try {
-			Node temp = test.getNode(vertex1);
+			Node temp = main.getNode(vertex1);
 			if(temp!=null){
 			temp.setValue(value);
 			temp.setProbed(true);
@@ -199,8 +199,8 @@ public class explorerAgent extends Thread implements Runnable {
 		vertex2 = findVertex(retString, 12+vertex1.length());
 		weight = findWeight(retString, vertex1.length()+vertex2.length());
 		try {
-			Node temp1 = test.getNode(vertex1);
-			Node temp2 = test.getNode(vertex2);
+			Node temp1 = main.getNode(vertex1);
+			Node temp2 = main.getNode(vertex2);
 			temp1.setSurveyed(true);
 			temp1.addEdgeToMap(temp2, weight);
 			temp2.addEdgeToMap(temp1, weight);
@@ -257,7 +257,7 @@ public class explorerAgent extends Thread implements Runnable {
 			position = retString.substring(9, 13);
 		}
 
-		test.createNode(position);
+		main.createNode(position);
 
 	}
 
@@ -266,11 +266,11 @@ public class explorerAgent extends Thread implements Runnable {
 		String vertex2 = "";
 		vertex1 = findVertex(retString, 10);
 		vertex2 = findEndVertex(retString, 11+vertex1.length());
-		test.createNode(vertex1);
-		test.createNode(vertex2);
+		main.createNode(vertex1);
+		main.createNode(vertex2);
 		try {
-			Node temp1 = test.getNode(vertex1);
-			Node temp2 = test.getNode(vertex2);
+			Node temp1 = main.getNode(vertex1);
+			Node temp2 = main.getNode(vertex2);
 			temp1.addEdgeToMap((temp2),0);;
 			temp2.addEdgeToMap((temp1),0);
 		} catch (InterruptedException e) {
@@ -376,7 +376,7 @@ public class explorerAgent extends Thread implements Runnable {
 
 	public void percieve() throws PerceiveException, NoEnvironmentException{
 		try {
-			test.s2.P();
+			main.s2.P();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -385,6 +385,6 @@ public class explorerAgent extends Thread implements Runnable {
 		for ( Collection<Percept> ps : percepts.values() ) {
 			ret.addAll(ps);
 		}
-		test.s2.V();
+		main.s2.V();
 	}
 }
