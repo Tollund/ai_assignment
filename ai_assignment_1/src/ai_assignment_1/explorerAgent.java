@@ -60,15 +60,8 @@ public class explorerAgent extends Thread implements Runnable {
 			}
 			recieveInput();
 			
-			try {
-				for (agentMap aM : main.getNodeDb()) {
-					System.out.println("Printer edgeList for node " + aM.getMainNode().getName());
-					aM.printEdgeList();
-				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+			
 //			action = canProbe();
 //			if(action != null){
 //				try {
@@ -166,6 +159,8 @@ public class explorerAgent extends Thread implements Runnable {
 	}
 
 	private void probedEdge(String retString) {
+		
+		
 		String vertex1 = "";
 		int value;
 		vertex1 = findVertex(retString, 11);
@@ -201,13 +196,12 @@ public class explorerAgent extends Thread implements Runnable {
 		try {
 			Node temp1 = main.getNode(vertex1);
 			Node temp2 = main.getNode(vertex2);
-			temp1.setSurveyed(true);
-			temp1.addEdgeToMap(temp2, weight);
-			temp2.addEdgeToMap(temp1, weight);
+			temp1.setSurveryed(true);
+			temp1.updateNodeList(temp2, weight);
+			temp2.updateNodeList(temp1, weight);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private int findWeight(String retString, int i) {
@@ -271,8 +265,8 @@ public class explorerAgent extends Thread implements Runnable {
 		try {
 			Node temp1 = main.getNode(vertex1);
 			Node temp2 = main.getNode(vertex2);
-			temp1.addEdgeToMap((temp2),0);;
-			temp2.addEdgeToMap((temp1),0);
+			temp1.addNodeToList(temp2);
+			temp2.addNodeToList(temp1);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -326,7 +320,6 @@ public class explorerAgent extends Thread implements Runnable {
 		}else if (retString.regionMatches(i+6,")",0, 1)){
 			edge = retString.substring(i+2, i+6);
 		}
-
 		return edge;
 	}
 

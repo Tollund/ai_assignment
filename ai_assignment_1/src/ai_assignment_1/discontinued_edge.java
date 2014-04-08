@@ -1,15 +1,15 @@
 package ai_assignment_1;
 
-public class edge {
+public class discontinued_edge {
 	private static Node node;
 	private int edge;
 	
-	public edge(Node node, int edge) {
+	public discontinued_edge(Node node, int edge) {
 		this.node = node;
 		this.edge = edge;
 	}
 	
-	public edge(Node node) {
+	public discontinued_edge(Node node) {
 		this.node = node;
 		this.edge = 0;
 	}

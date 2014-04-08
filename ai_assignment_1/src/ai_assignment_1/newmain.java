@@ -17,7 +17,7 @@ import eis.exceptions.PerceiveException;
 import eis.exceptions.RelationException;
 import eis.iilang.Percept;
 
-public class main{
+public class newmain{
 
 	static ArrayList explorers = new ArrayList<explorerAgent>();
 	static explorerAgent agent = new explorerAgent();
